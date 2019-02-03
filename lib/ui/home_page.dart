@@ -117,22 +117,21 @@ class _MyHomePageState extends State<MyHomePage> {
                         );
                       } else {
                         return Container(
-                          color: Colors.red,
                         );
                       }
                     }),
               ),
               Expanded(
                 flex: 3,
-                child: FutureBuilder(
-                    future: futurePemKey,
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        return Card(
-                          child: Container(
-                            padding: EdgeInsets.all(8),
-                            margin: EdgeInsets.all(8),
-                            child: SingleChildScrollView(
+                child: Card(
+                  child: Container(
+                    padding: EdgeInsets.all(8),
+                    margin: EdgeInsets.all(8),
+                    child: FutureBuilder(
+                        future: futurePemKey,
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            return SingleChildScrollView(
                               // the inkwell is used to register the taps
                               // in order to be able to copy the text
                               child: InkWell(
@@ -145,15 +144,15 @@ class _MyHomePageState extends State<MyHomePage> {
                                     ));
                                   },
                                   child: Text(snapshot.data)),
-                            ),
-                          ),
-                        );
-                      } else {
-                        return Center(
-                          child: Text("Your keys will appear here"),
-                        );
-                      }
-                    }),
+                            );
+                          } else {
+                            return Center(
+                              child: Text("Your keys will appear here"),
+                            );
+                          }
+                        }),
+                  ),
+                ),
               )
             ],
           ),
