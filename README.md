@@ -1,16 +1,27 @@
-# rsa_key_generator
+# Flutter RSA Key Generator
 
-Flutter app to generate RSA keys
+This project shows how to use [Pointy Castle](https://github.com/PointyCastle/pointycastle) to generate a RSA Key and encode it to a PKCS1 Pem String.
 
-## Getting Started
+![](rsa_generator.gif)
 
-This project is a starting point for a Flutter application.
+In order to generate a new `RSA Keypair` we use `RSAKeyGenerator`
 
-A few resources to get you started if this is your first Flutter project:
+```
+AsymmetricKeyPair<PublicKey, PrivateKey> computeRSAKeyPair(
+    SecureRandom secureRandom) {
+  var rsapars = new RSAKeyGeneratorParameters(BigInt.from(65537), 2048, 12);
+  var params = new ParametersWithRandom(rsapars, secureRandom);
+  var keyGenerator = new RSAKeyGenerator();
+  keyGenerator.init(params);
+  return keyGenerator.generateKeyPair();
+}
+```
 
-- [Lab: Write your first Flutter app](https://flutter.io/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.io/docs/cookbook)
+To be able generate the keys in a background thread we use Dart's [Isolate](https://api.dartlang.org/stable/2.1.0/dart-isolate/dart-isolate-library.html) implemented in Flutter's [compute](https://docs.flutter.io/flutter/foundation/compute.html). We must ensure that the `computeRSAKeyPair` function is placed __outside__ a `Class` so that it can be called globally.
 
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.io/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
+```
+Future<AsymmetricKeyPair<PublicKey, PrivateKey>> getRSAKeyPair(
+  SecureRandom secureRandom) async {
+  return await compute(computeRSAKeyPair, secureRandom);
+}
+```
