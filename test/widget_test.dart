@@ -7,8 +7,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pointycastle/key_generators/rsa_key_generator.dart';
+import 'package:pointycastle/pointycastle.dart';
 
 import 'package:rsa_key_generator/main.dart';
+import 'package:rsa_key_generator/utils/rsa_key_helper.dart';
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
@@ -27,4 +30,18 @@ void main() {
     expect(find.text('0'), findsNothing);
     expect(find.text('1'), findsOneWidget);
   });
+
+  test("test", () async {
+    RsaKeyHelper helper = RsaKeyHelper();
+    var keyPair = await helper.computeRSAKeyPair(helper.getSecureRandom());
+    print(keyPair.privateKey.toString());
+  });
+
+  test("Keys test", () {
+    var keyGenerator = new RSAKeyGenerator();
+    var keypair = keyGenerator.generateKeyPair();
+    expect(keypair, isNotNull);
+  });
 }
+
+

@@ -15,7 +15,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   /// The Future that will show the Pem String
-  Future<String> futurePemKey;
+  Future<String> futureText;
 
   /// Future to hold the reference to the KeyPair generated with PointyCastle
   /// in order to extract the [crypto.PrivateKey] and [crypto.PublicKey]
@@ -30,12 +30,15 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<crypto.AsymmetricKeyPair<crypto.PublicKey, crypto.PrivateKey>>
       getKeyPair() {
     var keyHelper = DependencyProvider.of(context).getRsaKeyHelper();
-    return keyHelper.getRSAKeyPair(keyHelper.getSecureRandom());
+    return keyHelper.computeRSAKeyPair(keyHelper.getSecureRandom());
   }
 
   /// GlobalKey to be used when showing the [Snackbar] for the successful
   /// copy of the Key
   final key = new GlobalKey<ScaffoldState>();
+
+  /// Text Editing Controller to retrieve the text to sign
+  TextEditingController _controller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 onPressed: () {
                   setState(() {
                     // If there are any pemString being shown, then show an empty message
-                    futurePemKey = Future.value("");
+                    futureText = Future.value("");
                     // Generate a new keypair
                     futureKeyPair = getKeyPair();
                   });
@@ -89,7 +92,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 setState(() {
                                   // With the stored keypair, encode the private key to
                                   // PKCS1 and show it
-                                  futurePemKey = Future.value(
+                                  futureText = Future.value(
                                       DependencyProvider.of(context)
                                           .getRsaKeyHelper()
                                           .encodePrivateKeyToPemPKCS1(
@@ -105,14 +108,36 @@ class _MyHomePageState extends State<MyHomePage> {
                                 setState(() {
                                   // With the stored keypair, encode the public key to
                                   // PKCS1 and show it
-                                  futurePemKey = Future.value(
+                                  futureText = Future.value(
                                       DependencyProvider.of(context)
                                           .getRsaKeyHelper()
                                           .encodePublicKeyToPemPKCS1(
                                               keyPair.publicKey));
                                 });
                               },
-                            )
+                            ),
+                            TextField(
+                              decoration: InputDecoration(
+                                hintText: "Text to Sign"
+                              ),
+                              controller: _controller,
+                            ),
+                            MaterialButton(
+                              color: Colors.black87,
+                              child:
+                              Text("Sign Text", style: whiteTextStyle),
+                              onPressed: () {
+                                setState(() {
+                                  futureText = Future.value(
+                                      DependencyProvider.of(context)
+                                          .getRsaKeyHelper()
+                                          .sign(
+                                          _controller.text,
+                                          keyPair.privateKey));
+                                });
+                              },
+                            ),
+
                           ],
                         );
                       } else {
@@ -122,13 +147,13 @@ class _MyHomePageState extends State<MyHomePage> {
                     }),
               ),
               Expanded(
-                flex: 3,
+                flex: 2,
                 child: Card(
                   child: Container(
                     padding: EdgeInsets.all(8),
                     margin: EdgeInsets.all(8),
                     child: FutureBuilder(
-                        future: futurePemKey,
+                        future: futureText,
                         builder: (context, snapshot) {
                           if (snapshot.hasData) {
                             return SingleChildScrollView(
